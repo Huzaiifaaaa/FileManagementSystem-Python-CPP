@@ -50,9 +50,9 @@ void printCurrentDirectory()
     directory = opendir(".");//opening directory
     if (directory)
     {
-        while ((direct = readdir(directory)) != NULL)//looping till every file is iterated
+        while ((direct = readdir(directory)) != NULL )//looping till every file is iterated
         {
-            printf("%s\n", direct->d_name);//printing file names
+            printf("%s\n", direct->d_name);//printing file name;
         }
         closedir(directory);//closing directory
         printf("\n");//new line
@@ -65,23 +65,16 @@ int main()
     while(1)
     {
         string command;
-        cout << getCurrentDirectory() << "\\ ";
-        cin >> command;
-
+        cout << getCurrentDirectory() << "\\> ";
+        getline (cin, command);
+        string path=command.substr(command.find(" ")+1,command.length()-2);
+        command=command.substr(0,command.find(" "));
 
         if(command == "mkdir")
         {
-            string directory;
-            cout<<"Enter Name: ";
-            cin >> directory;
+            int status=mkdir(path.c_str());
 
-            int status=mkdir(directory.c_str());
-
-            if (!status)
-            {
-                printMessage("Directory created successfully.");
-            }
-            else 
+            if (status)
             {
                 printMessage("Directory already exists.");
             }
@@ -92,11 +85,7 @@ int main()
         }
         else if(command == "cd")
         {
-            string directory;
-            cout<<"Enter Directory: ";
-            cin >> directory;
-
-            int status=chdir(directory.c_str());
+            int status=chdir(path.c_str());
             if(status<0)
             {
                 printMessage("The system cannot find the path specified.");
