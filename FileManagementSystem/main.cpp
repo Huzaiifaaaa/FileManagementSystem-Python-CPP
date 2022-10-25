@@ -15,20 +15,16 @@
 #include<process.h>
 #include<wchar.h>
 #include <sys/types.h>
+#include<vector>
 
 using namespace std;
 
-std::string getCurrentDirectory() {
-   char buff[FILENAME_MAX]; 
-   GetCurrentDir( buff, FILENAME_MAX );
-   string current_working_dir(buff);
-   return current_working_dir;
-}
-
-void printMessage(string message)
+class node
 {
-    cout << message << endl;
-}
+    public:
+        string name;
+        vector<node*> children;
+};
 
 void invalidCommand(string command)
 {
@@ -45,87 +41,71 @@ void getHelp()
     cout << "help - Display the user manual." << endl;
     cout << "exit - Exit the shell.\n" << endl;
 }
-
-void printCurrentDirectory()
+void printMessage(string message)
 {
-    DIR *directory;//pointer to directory
-    struct dirent *direct;//pointer to directory
-    directory = opendir(".");//opening directory
-    if (directory)
-    {
-        while ((direct = readdir(directory)) != NULL )//looping till every file is iterated
-        {
-            printf("%s\n", direct->d_name);//printing file name;
-        }
-        closedir(directory);//closing directory
-        printf("\n");//new line
-    }
+    cout << message << endl;
 }
 
-void createFile(string path)
-{
-    fstream file;
-    file.open(path, ios::out);
-    if(!file)
-    {
-       printMessage("Error in creating file");
-       return;
-    }
-
-    file.close();
-}
-
-void deleteFile(string path)
-{
-    if(remove( path.c_str() ) != 0 )
-    {
-        printMessage("Error in deleting file");
-    }
-}
 
 int main()
 {
+    struct node *root = new node;
+    root->name = "root";
+    //root->children.push_back(new node);
+
+    struct node *current=root;
+    string path;
+
     cout<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
     while(1)
     {
         string command;
-        cout << getCurrentDirectory() << "\\> ";
+
+        if(current->name!=path)
+        {
+            path+=current->name;
+        }
+
+        
+        cout << path << "\\> ";
         getline (cin, command);
         string path=command.substr(command.find(" ")+1,command.length()-2);
         command=command.substr(0,command.find(" "));
 
+
+
         if(command == "mkdir")
         {
-            int status=mkdir(path.c_str());
-
-            if (status)
+            for(int i=0;i<current->children.size();i++)
             {
-                printMessage("Directory already exists.");
+                if(root->children[i]->name==path)
+                {
+                    printMessage("Directory already exists");
+                    continue;
+                }
             }
+
+            struct node *mkdir = new node;
+            mkdir->name = path;
+            current->children.push_back(mkdir);
         }
         else if(command == "ls")
         {
-            printCurrentDirectory();
+            for(int i=0;i<current->children.size();i++)
+            {
+                cout<<current->children[i]->name<<endl;
+            }
         }
         else if(command == "cd")
         {
-            int status=chdir(path.c_str());
-            if(status<0)
+           for(int i=0;i<current->children.size();i++)
             {
-                printMessage("The system cannot find the path specified.");
+                if(root->children[i]->name==path)
+                {
+                    current=current->children[i];
+                    continue;
+                }
             }
-        }
-        else if(command=="touch")
-        {
-            createFile(path);
-        }
-        else if(command=="delete")
-        {
-            deleteFile(path);
-        }
-        else if(command=="help")
-        {
-            getHelp();
         }
         else if(command == "exit")
         {
@@ -136,5 +116,4 @@ int main()
             invalidCommand(command);
         }
     }
-    return 0;
 }
