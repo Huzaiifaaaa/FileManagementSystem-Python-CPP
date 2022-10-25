@@ -35,12 +35,11 @@ void getHelp()
 {
     cout << "cd [directory] - Change the current directory to [directory]." << endl;
     cout <<"mkdir [directory] - Create the directory specified in [directory]." << endl;
-    cout <<"touch [name] - Create the file in specified directory." << endl;
-    cout <<"delete [name] - Delete the file in specified directory." << endl;
     cout << "ls [directory] - Display a list of files and subdirectories in a directory." << endl;
     cout << "help - Display the user manual." << endl;
     cout << "exit - Exit the shell.\n" << endl;
 }
+
 void printMessage(string message)
 {
     cout << message << endl;
@@ -49,45 +48,46 @@ void printMessage(string message)
 
 int main()
 {
+    string path;
     struct node *root = new node;
     root->name = "root";
-    //root->children.push_back(new node);
-
     struct node *current=root;
-    string path;
+    string directory=current->name;
 
     cout<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
+
     while(1)
     {
         string command;
-
-        if(current->name!=path)
-        {
-            path+=current->name;
-        }
-
-        
-        cout << path << "\\> ";
+        cout << directory << "\\> ";
         getline (cin, command);
+
         string path=command.substr(command.find(" ")+1,command.length()-2);
         command=command.substr(0,command.find(" "));
 
-
-
         if(command == "mkdir")
         {
+            bool exists=false;
             for(int i=0;i<current->children.size();i++)
             {
                 if(root->children[i]->name==path)
                 {
-                    printMessage("Directory already exists");
-                    continue;
+                    
+                    exists=true;
+                    break;
                 }
             }
 
-            struct node *mkdir = new node;
-            mkdir->name = path;
-            current->children.push_back(mkdir);
+            if(exists)
+            {
+                printMessage("Directory already exists");
+            }
+            else
+            {
+                struct node *mkdir = new node;
+                mkdir->name = path;
+                current->children.push_back(mkdir);
+            }
         }
         else if(command == "ls")
         {
@@ -100,12 +100,19 @@ int main()
         {
            for(int i=0;i<current->children.size();i++)
             {
-                if(root->children[i]->name==path)
+                if(current->children[i]->name==path)
                 {
+                    directory+="\\"+current->children[i]->name;
                     current=current->children[i];
-                    continue;
+                    break;
                 }
             }
+
+            //printMessage("Directory does not exist");
+        }
+        else if(command == "help")
+        {
+            getHelp();
         }
         else if(command == "exit")
         {
