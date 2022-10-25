@@ -7,6 +7,7 @@
 #endif
 #include<iostream>
 #include<stdio.h>
+#include <fstream>
 #include<stdlib.h>
 #include<string.h>
 #include <malloc.h>
@@ -38,6 +39,8 @@ void getHelp()
 {
     cout << "cd [directory] - Change the current directory to [directory]." << endl;
     cout <<"mkdir [directory] - Create the directory specified in [directory]." << endl;
+    cout <<"touch [name] - Create the file in specified directory." << endl;
+    cout <<"delete [name] - Delete the file in specified directory." << endl;
     cout << "ls [directory] - Display a list of files and subdirectories in a directory." << endl;
     cout << "help - Display the user manual." << endl;
     cout << "exit - Exit the shell.\n" << endl;
@@ -56,6 +59,27 @@ void printCurrentDirectory()
         }
         closedir(directory);//closing directory
         printf("\n");//new line
+    }
+}
+
+void createFile(string path)
+{
+    fstream file;
+    file.open(path, ios::out);
+    if(!file)
+    {
+       printMessage("Error in creating file");
+       return;
+    }
+
+    file.close();
+}
+
+void deleteFile(string path)
+{
+    if(remove( path.c_str() ) != 0 )
+    {
+        printMessage("Error in deleting file");
     }
 }
 
@@ -90,6 +114,14 @@ int main()
             {
                 printMessage("The system cannot find the path specified.");
             }
+        }
+        else if(command=="touch")
+        {
+            createFile(path);
+        }
+        else if(command=="delete")
+        {
+            deleteFile(path);
         }
         else if(command=="help")
         {
