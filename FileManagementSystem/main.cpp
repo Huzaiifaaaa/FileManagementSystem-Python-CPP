@@ -79,7 +79,6 @@ string reverseString(string directory)
 
 int main()
 {
-    time_t ttime = time(0);
     string path;
     struct Node *root = new Node("root", false, NULL);
     struct Node *current=root;
@@ -95,7 +94,7 @@ int main()
 
         string path=command.substr(command.find(" ")+1,command.length()-2);
         command=command.substr(0,command.find(" "));
-
+        
         if(command == "mkdir")
         {
             bool exists=false;
@@ -116,6 +115,7 @@ int main()
             {
                 struct Node *mkdir = new Node(path, false, current);
                 current->children.push_back(mkdir);
+                time_t ttime = time(0);
                 current->modifiedAt = strtok(ctime(&ttime),"\n");
             }
         }
@@ -181,6 +181,7 @@ int main()
             {
                 struct Node *file = new Node(path, true, current);
                 current->children.push_back(file);
+                time_t ttime = time(0);
                 current->modifiedAt = strtok(ctime(&ttime),"\n");
             }
         }
@@ -204,6 +205,8 @@ int main()
             else
             {
                 current->children.erase(current->children.begin()+i);
+                time_t ttime = time(0);
+                current->modifiedAt = strtok(ctime(&ttime),"\n");
             }
         }
         else if(command=="write")
@@ -224,16 +227,37 @@ int main()
             }
             else
             {
-
                 string data;
+                string mode;
+
+                while(1)
+                {
+                    cout<<"Enter mode (a/w): ";
+                    getline(cin,mode);
+
+                    if(mode=="a" || mode=="w")
+                    {
+                        break;
+                    }
+                }
+
                 cout<<"Enter data: ";
                 getline(cin,data);
                 for(int i=0;i<current->children.size();i++)
                 {
                     if(current->children[i]->name==path && current->children[i]->isFile)
                     {  
-                        current->children[i]->data=data;
+                        if(mode=="a")
+                        {
+                            current->children[i]->data+=data;
+                        }
+                        else
+                        {
+                            current->children[i]->data=data;
+                        }
+                        time_t ttime = time(0);
                         current->children[i]->modifiedAt = strtok(ctime(&ttime),"\n");
+                        current->modifiedAt = current->children[i]->modifiedAt;
                         break;
                     }
                 }
@@ -241,8 +265,9 @@ int main()
         }
         else if(command=="read")
         {
+            int i=0;
             bool exists=false;
-            for(int i=0;i<current->children.size();i++)
+            for(i=0;i<current->children.size();i++)
             {
                 if(current->children[i]->name==path && current->children[i]->isFile)
                 {  
@@ -255,15 +280,40 @@ int main()
             {
                 printMessage("File doesnot exists");
             }
-            else
+            else if(current->children[i]->data.size()!=0)
             {
-                for(int i=0;i<current->children.size();i++)
+                string mode;
+                string start="0";
+                while(1)
                 {
-                    if(current->children[i]->name==path && current->children[i]->isFile)
-                    {  
-                        cout<<current->children[i]->data<<endl;
+                    
+                    cout<<"Enter mode (s/f): ";
+                    getline(cin,mode);
+
+                    if(mode=="f")
+                    {
+                        cout<<"Enter index: ";
+                        getline(cin,start);
+                    }
+                    
+                    if(mode=="s" || mode=="f")
+                    {
                         break;
                     }
+                }
+
+                if(mode=="s")
+                {
+                    cout<<current->children[i]->data<<endl;
+
+                }
+                else
+                {
+                    for(int j=stoi(start);j<current->children[i]->data.size();j++)
+                    {
+                        cout<<current->children[i]->data[j];
+                    }
+                    cout<<endl;
                 }
             }
         }
