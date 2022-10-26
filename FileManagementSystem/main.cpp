@@ -1,29 +1,46 @@
-#ifdef WINDOWS
 #include <direct.h>
-#define GetCurrentDir _getcwd
-#else
 #include <unistd.h>
-#define GetCurrentDir getcwd
-#endif
 #include<iostream>
 #include<stdio.h>
 #include <fstream>
+#include <chrono>
+#include <ctime>   
 #include<stdlib.h>
 #include<string.h>
+#include <algorithm>
 #include <malloc.h>
-#include <dirent.h>
 #include<process.h>
 #include<wchar.h>
 #include <sys/types.h>
 #include<vector>
+#include <ctime>
 
 using namespace std;
 
-class node
+class Node
 {
     public:
         string name;
-        vector<node*> children;
+        bool isFile;
+        Node* parent;
+        string data;
+        vector<Node*> children;
+        string createdAt;
+        string modifiedAt;
+        
+        Node(string name, bool isFile, Node* parent)
+        {
+            time_t ttime = time(0);
+            this->name = name;
+            this->isFile = isFile;
+            this->parent = parent;
+            this->createdAt = this->modifiedAt = strtok(ctime(&ttime),"\n");
+
+            if(!isFile)
+            {
+                this->data = "";    
+            }
+        }
 };
 
 void invalidCommand(string command)
@@ -36,6 +53,10 @@ void getHelp()
     cout << "cd [directory] - Change the current directory to [directory]." << endl;
     cout <<"mkdir [directory] - Create the directory specified in [directory]." << endl;
     cout << "ls [directory] - Display a list of files and subdirectories in a directory." << endl;
+    cout<<"touch [filename] - Create a file with the name [filename]." << endl;
+    cout << "delete [filename] - Delete the file specified in [filename]." << endl;
+    cout << "read [filename] - Reads the file specified in [filename]." << endl;
+    cout << "write [filename] - Writes to the file specified in [filename]." << endl;
     cout << "help - Display the user manual." << endl;
     cout << "exit - Exit the shell.\n" << endl;
 }
@@ -45,13 +66,23 @@ void printMessage(string message)
     cout << message << endl;
 }
 
+string reverseString(string directory)
+{
+    string rev = "";
+    
+    for(int i=directory.length()-1; i>=0; i--){
+        rev = rev + directory[i];  
+    }
+
+    return rev;
+}
 
 int main()
 {
+    time_t ttime = time(0);
     string path;
-    struct node *root = new node;
-    root->name = "root";
-    struct node *current=root;
+    struct Node *root = new Node("root", false, NULL);
+    struct Node *current=root;
     string directory=current->name;
 
     cout<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
@@ -70,9 +101,8 @@ int main()
             bool exists=false;
             for(int i=0;i<current->children.size();i++)
             {
-                if(root->children[i]->name==path)
+                if(root->children[i]->name==path && root->children[i]->isFile==false)
                 {
-                    
                     exists=true;
                     break;
                 }
@@ -84,31 +114,158 @@ int main()
             }
             else
             {
-                struct node *mkdir = new node;
-                mkdir->name = path;
+                struct Node *mkdir = new Node(path, false, current);
                 current->children.push_back(mkdir);
+                current->modifiedAt = strtok(ctime(&ttime),"\n");
             }
         }
         else if(command == "ls")
         {
-            for(int i=0;i<current->children.size();i++)
+            if(current->children.size()!=0)
             {
-                cout<<current->children[i]->name<<endl;
+                cout<<"No.\tName\tisFile\tSize\t\tCreated At\t\t\tModified At"<<endl;
+                for(int i=0;i<current->children.size();i++)
+                {
+                    if(current->children[i]->isFile==1)
+                    {
+                        cout<<i+1<<"\t"<<current->children[i]->name<<"\t  "<<"True\t"<< current->children[i]->data.length() <<"\t"<<current->children[i]->createdAt<<"\t"<<current->children[i]->modifiedAt<<endl;
+                    }
+                    else
+                    {
+                        cout<<i+1<<"\t"<<current->children[i]->name<<"\t  "<<"False\t"<<"---\t"<<current->children[i]->createdAt<<"\t"<<current->children[i]->modifiedAt<<endl;
+                    }
+                    
+                }
+                cout<<endl;
             }
         }
         else if(command == "cd")
         {
-           for(int i=0;i<current->children.size();i++)
+            if(path==".." && current->parent!=NULL)
             {
-                if(current->children[i]->name==path)
+                current=current->parent;  
+                string temp=reverseString(directory);
+                temp=temp.substr(temp.find("\\")+1,temp.length()-1);
+                directory=reverseString(temp);
+            }
+            else
+            {
+                for(int i=0;i<current->children.size();i++)
                 {
-                    directory+="\\"+current->children[i]->name;
-                    current=current->children[i];
+                    if(current->children[i]->name==path)
+                    {
+                        directory+="\\"+current->children[i]->name;
+                        current=current->children[i];
+                        break;
+                    }
+                }
+            }
+        }
+        else if(command=="touch")
+        {
+            bool exists=false;
+            for(int i=0;i<current->children.size();i++)
+            {
+                if(current->children[i]->name==path && current->children[i]->isFile)
+                {  
+                    exists=true;
                     break;
                 }
             }
 
-            //printMessage("Directory does not exist");
+            if(exists)
+            {
+                printMessage("File already exists");
+            }
+            else
+            {
+                struct Node *file = new Node(path, true, current);
+                current->children.push_back(file);
+                current->modifiedAt = strtok(ctime(&ttime),"\n");
+            }
+        }
+        else if(command=="delete")
+        {
+            int i=0;
+            bool exists=false;
+            for(i=0;i<current->children.size();i++)
+            {
+                if(current->children[i]->name==path && current->children[i]->isFile)
+                {  
+                    exists=true;
+                    break;
+                }
+            }
+
+            if(!exists)
+            {
+                printMessage("File doesnot exists");
+            }
+            else
+            {
+                current->children.erase(current->children.begin()+i);
+            }
+        }
+        else if(command=="write")
+        {
+            bool exists=false;
+            for(int i=0;i<current->children.size();i++)
+            {
+                if(current->children[i]->name==path && current->children[i]->isFile)
+                {  
+                    exists=true;
+                    break;
+                }
+            }
+
+            if(!exists)
+            {
+                printMessage("File doesnot exists");
+            }
+            else
+            {
+
+                string data;
+                cout<<"Enter data: ";
+                getline(cin,data);
+                for(int i=0;i<current->children.size();i++)
+                {
+                    if(current->children[i]->name==path && current->children[i]->isFile)
+                    {  
+                        current->children[i]->data=data;
+                        current->children[i]->modifiedAt = strtok(ctime(&ttime),"\n");
+                        break;
+                    }
+                }
+            }
+        }
+        else if(command=="read")
+        {
+            bool exists=false;
+            for(int i=0;i<current->children.size();i++)
+            {
+                if(current->children[i]->name==path && current->children[i]->isFile)
+                {  
+                    exists=true;
+                    break;
+                }
+            }
+
+            if(!exists)
+            {
+                printMessage("File doesnot exists");
+            }
+            else
+            {
+                for(int i=0;i<current->children.size();i++)
+                {
+                    if(current->children[i]->name==path && current->children[i]->isFile)
+                    {  
+                        cout<<current->children[i]->data<<endl;
+                        break;
+                    }
+                }
+            }
         }
         else if(command == "help")
         {
