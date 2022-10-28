@@ -59,6 +59,7 @@ void getHelp()
     cout<<"move [source] [destinaiton] - Moves source to specified [directory]." << endl;
     cout << "read [filename] [m] [p] - Reads the file specified in [filename]." << endl;
     cout << "write [filename] [m]- Writes to the file specified in [filename]." << endl;
+    cout<< "truncate [filename] [p]- Truncates the file specified in [filename]." << endl;
     cout << "memory - Displays the memory tree." << endl;
     cout << "help - Display the user manual." << endl;
     cout << "exit - Exit the shell.\n" << endl;
@@ -129,14 +130,27 @@ void printTree(Node *root, int level)
     }
 }
 
+void saveFile(Node *root)
+{
+    ofstream file("memory.dat");
+    file.write((char*)root,sizeof(Node));
+    file.close();
+}
+
+void loadFile(Node *root)
+{
+    
+}
+
 int main()
 {
     int size = 1048576;
     string path;
     struct Node *root = new Node("root", false, NULL);
+
     struct Node *current=root;
     string directory=current->name;
-
+    
     cout<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
 
     while(1)
@@ -506,7 +520,22 @@ int main()
         }
         else if(command == "exit")
         {
-            break;
+            while(1)
+            {
+                cout<<"Do you want to save changes? (y/n): ";
+                char ch;
+                cin>>ch;
+
+                if(ch=='y')
+                {
+                    saveFile(root);
+                    exit(0);
+                }
+                else
+                {
+                    exit(0);
+                }
+            }
         }
         else
         {
