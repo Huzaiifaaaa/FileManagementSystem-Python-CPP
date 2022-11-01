@@ -60,6 +60,7 @@ void getHelp()
     cout << "read [filename] [m] [p] - Reads the file specified in [filename]." << endl;
     cout << "write [filename] [m]- Writes to the file specified in [filename]." << endl;
     cout<< "truncate [filename] [p]- Truncates the file specified in [filename]." << endl;
+    cout <<"clear - Clears the screen." << endl;
     cout << "memory - Displays the memory tree." << endl;
     cout << "help - Display the user manual." << endl;
     cout << "exit - Exit the shell.\n" << endl;
@@ -513,6 +514,11 @@ int main()
             cout<<"Used: "<<1048576-size<<" KB's"<<endl;
             cout<<"Free: "<<size<<" KB's"<<endl;
             printTree(root,0);
+        }
+        else if(command=="clear")
+        {
+            system("cls");
+            cout<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
         }
         else if(command == "help")
         {
