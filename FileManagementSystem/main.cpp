@@ -23,8 +23,10 @@ class Node
     public:
         string name;
         bool isFile;
+        bool isOpen;
         Node* parent;
         string data;
+        string mode;
         vector<Node*> children;
         string createdAt;
         string modifiedAt;
@@ -34,6 +36,7 @@ class Node
             time_t ttime = time(0);
             this->name = name;
             this->isFile = isFile;
+            this->isOpen=false;
             this->parent = parent;
             this->createdAt = this->modifiedAt = strtok(ctime(&ttime),"\n");
 
@@ -51,17 +54,21 @@ void invalidCommand(string command)
 
 void getHelp()
 {
-    cout << "cd [directory] - Change the current directory to [directory]." << endl;
-    cout <<"mkdir [directory] - Create the directory specified in [directory]." << endl;
     cout << "ls [directory] - Display a list of files and subdirectories in a directory." << endl;
-    cout<<"touch [filename] - Create a file with the name [filename]." << endl;
+    cout<<"create [filename] - Create a file with the name [filename]." << endl;
     cout << "delete [filename] - Delete the file specified in [filename]." << endl;
+    cout <<"mkdir [directory] - Create the directory specified in [directory]." << endl;
+    cout << "cd [directory] - Change the current directory to [directory]." << endl;
     cout<<"move [source] [destinaiton] - Moves source to specified [directory]." << endl;
+    cout << "open [filename] [m]- Open the file specified in [filename]." << endl;
+    cout << "close [filename] - Close the file specified in [filename]." << endl;
+    cout << "write [filename] [m] [p] [data]- Writes to the file specified in [filename]." << endl;
     cout << "read [filename] [m] [p] - Reads the file specified in [filename]." << endl;
-    cout << "write [filename] [m]- Writes to the file specified in [filename]." << endl;
     cout<< "truncate [filename] [p]- Truncates the file specified in [filename]." << endl;
-    cout <<"clear - Clears the screen." << endl;
+
+
     cout << "memory - Displays the memory tree." << endl;
+    cout <<"clear - Clears the screen." << endl;
     cout << "help - Display the user manual." << endl;
     cout << "exit - Exit the shell.\n" << endl;
 }
@@ -145,7 +152,7 @@ void loadFile(Node *root)
 
 int main()
 {
-    int size = 1048576;
+    int size = 1024;//1MB
     string path;
     struct Node *root = new Node("root", false, NULL);
 
@@ -160,6 +167,7 @@ int main()
         string start="";      
         string mode="";
         string command="";
+        string data="";
 
         cout << directory << "\\> ";
         getline (cin, command);
@@ -175,14 +183,22 @@ int main()
         int i=0;
         for(string s: tokens)
         {
-            arguments[i] = s;
-            i++;
+            if(i<3)
+            {
+                arguments[i] = s;
+                i++;
+            }
+            else
+            {
+                arguments[4] += s + " ";
+            }
         }
 
         command=arguments[0];
         path=arguments[1];
         mode=arguments[2];
         start=arguments[3];
+        data=arguments[4];
 
         for(int i=0;i<5;i++)
         {
@@ -213,7 +229,7 @@ int main()
                 else
                 {
                     struct Node *mkdir = new Node(path, false, current);
-                    size-=sizeof(mkdir);
+                    // size-=sizeof(mkdir);
                     current->children.push_back(mkdir);
                     time_t ttime = time(0);
                     current->modifiedAt = strtok(ctime(&ttime),"\n");
@@ -293,7 +309,7 @@ int main()
                 current->modifiedAt = strtok(ctime(&ttime),"\n");
             }
         }
-        else if(command=="touch")
+        else if(command=="create")
         {
             if(number>=2)
             {
@@ -349,6 +365,80 @@ int main()
                 }
             }
         }
+        else if(command=="open")
+        {
+            bool exists=false;
+            for(int i=0;i<current->children.size();i++)
+            {
+                if(current->children[i]->name==path && current->children[i]->isFile)
+                {  
+                    exists=true;
+                    break;
+                }
+            }
+
+            if(number>=2)
+            {
+                if(!exists)
+                {
+                    printMessage("File doesnot exists");
+                }
+                else
+                {
+                    for(int i=0;i<current->children.size();i++)
+                    {
+                        if(current->children[i]->name==path && current->children[i]->isFile && current->children[i]->isOpen==false)
+                        {  
+                            current->children[i]->isOpen=true;
+                            current->children[i]->mode=mode;
+                            printMessage("File opened.");
+                            break;
+                        }
+                        else if(current->children[i]->isOpen==true)
+                        {
+                            printMessage("File is already open.");
+                        }
+                    }
+                }
+            }
+        }
+        else if(command=="close")
+        {
+            bool exists=false;
+            for(int i=0;i<current->children.size();i++)
+            {
+                if(current->children[i]->name==path && current->children[i]->isFile)
+                {  
+                    exists=true;
+                    break;
+                }
+            }
+
+            if(number>=2)
+            {
+                if(!exists)
+                {
+                    printMessage("File doesnot exists");
+                }
+                else
+                {
+                    for(int i=0;i<current->children.size();i++)
+                    {
+                        if(current->children[i]->name==path && current->children[i]->isFile && current->children[i]->isOpen==true)
+                        {  
+                            current->children[i]->isOpen=false;
+                            current->children[i]->mode="";
+                            printMessage("File closed.");
+                            break;
+                        }
+                        else if(current->children[i]->isOpen==false)
+                        {
+                            printMessage("File is already closed.");
+                        }
+                    }
+                }
+            }
+        }
         else if(command=="write")
         {
             bool exists=false;
@@ -369,14 +459,11 @@ int main()
                     printMessage("File doesnot exists");
                 }
                 else
-                {
+                {                    
                     size-=sizeof(current->children[i]);
-                    string data;
-                    cout<<"Enter data: ";
-                    getline(cin,data);
                     for(int i=0;i<current->children.size();i++)
                     {
-                        if(current->children[i]->name==path && current->children[i]->isFile)
+                        if(current->children[i]->name==path && current->children[i]->isFile && current->children[i]->isOpen==true)
                         {  
                             if(mode=="a")
                             {
@@ -397,6 +484,10 @@ int main()
                             current->children[i]->modifiedAt = strtok(ctime(&ttime),"\n");
                             current->modifiedAt = current->children[i]->modifiedAt;
                             break;
+                        }
+                        else
+                        {
+                            printMessage("File is not opened.");
                         }
                     }
                 }
@@ -421,12 +512,11 @@ int main()
                 {
                     printMessage("File doesnot exists");
                 }
-                else if(current->children[i]->data.size()!=0)
+                else if(current->children[i]->data.size()!=0 && current->children[i]->isOpen==true)
                 {
                     if(mode=="s")
                     {
                         cout<<current->children[i]->data<<endl;
-
                     }
                     else if(mode=="f")
                     {
@@ -444,9 +534,13 @@ int main()
                         printMessage("Invalid mode");
                     }
                 }
+                else if(current->children[i]->isOpen==false)
+                {
+                    printMessage("File is not opened.");
+                }
             }
         }
-        else if(command=="copy")
+        else if(command=="move")
         {
             if(number>=5)
             {
@@ -510,10 +604,32 @@ int main()
         }
         else if(command=="memory")
         {
-            cout<<"Total: 1048576 KB's"<<endl;
-            cout<<"Used: "<<1048576-size<<" KB's"<<endl;
+            int temp=0;
+            int used=1024-size;
+            cout<<"Total: 1024 KB's"<<endl;
+            cout<<"Used: "<<used<<" KB's"<<endl;
             cout<<"Free: "<<size<<" KB's"<<endl;
+            printf("\n\n");
             printTree(root,0);
+
+            printf("\n\n");
+            temp=used;
+            for(int i=0;i<8;i++)
+            {
+                printf("\t");
+                for(int j=0;j<temp;j++)
+                {
+                   printf("/");
+                }
+                for(int j=0;j<128-temp;j++)
+                {
+                   printf("-");
+                }
+                temp=0;
+                printf("\n");
+            }       
+
+            printf("\n\n");
         }
         else if(command=="clear")
         {
