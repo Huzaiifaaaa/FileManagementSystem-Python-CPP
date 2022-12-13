@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1670950094 source:c:\users\huzai\documents\github\filemanagementsystem\filemanagementsystem\main.cpp
+	<direct.h>
+	<unistd.h>
+	<iostream>
+	<stdio.h>
+	<fstream>
+	<chrono>
+	<cstring>
+	<ctime>
+	<stdlib.h>
+	<string.h>
+	<algorithm>
+	<malloc.h>
+	<process.h>
+	<wchar.h>
+	<sys/types.h>
+	<vector>
+	<ctime>
+	<pthread.h>
+

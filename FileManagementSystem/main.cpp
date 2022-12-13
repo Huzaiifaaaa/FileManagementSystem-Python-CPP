@@ -48,9 +48,9 @@ class Node
         }
 };
 
-void invalidCommand(string command)
+void invalidCommand(string command,ofstream outputfile)
 {
-    cout << "'"<<command <<"' "<<"is not recognized as an internal or external command, operable program or batch file.\n" << endl;
+    cout<< "'"<<command <<"' "<<"is not recognized as an internal or external command, operable program or batch file.\n" << endl;
 }
 
 void getHelp()
@@ -62,12 +62,10 @@ void getHelp()
     cout << "cd [directory] - Change the current directory to [directory]." << endl;
     cout<<"move [source] [destinaiton] - Moves source to specified [directory]." << endl;
     cout << "open [filename] [m]- Open the file specified in [filename]." << endl;
-    cout << "close [filename] - Close the file specified in [filename]." << endl;
+    cout<< "close [filename] - Close the file specified in [filename]." << endl;
     cout << "write [filename] [m] [p] [data]- Writes to the file specified in [filename]." << endl;
     cout << "read [filename] [m] [p] - Reads the file specified in [filename]." << endl;
     cout<< "truncate [filename] [p]- Truncates the file specified in [filename]." << endl;
-
-
     cout << "memory - Displays the memory tree." << endl;
     cout <<"clear - Clears the screen." << endl;
     cout << "help - Display the user manual." << endl;
@@ -151,28 +149,49 @@ void loadFile(Node *root)
 
 }
 
+int size = 1024;//1MB
+string path;
+struct Node *root = new Node("root", false, NULL);
+
+struct Node *current=root;
+string directory=current->name;
 
 void *executeCommand(void *parameter)
 {
     int thread=*((int*)(&parameter))+1;
-    int size = 1024;//1MB
-    string path;
-    struct Node *root = new Node("root", false, NULL);
+    string inputdata[10];
 
-    struct Node *current=root;
-    string directory=current->name;
-    cout<<"\n\nOS File Management System [Version 10.0."<<thread<<"]. All rights reserved.\n\n"<<endl;
+    ifstream inputfile("input_thread"+to_string(thread)+".txt");
+    string text;
+    int i=0;
+    while (getline (inputfile, text))
+    {
+        inputdata[i]=text;
+        i++;
 
-    while(1)
+        if(i==10)
+        {
+            break;
+        }
+    }
+    inputfile.close();
+
+    ofstream outputfile("output_thread"+to_string(thread)+".txt");
+    outputfile<<"\n\nOS File Management System [Version 10.0."<<thread<<"]. All rights reserved.\n\n"<<endl;
+
+    int j=0;
+    while(j<i)
     {
         int number=0;
         string start="";
         string mode="";
         string command="";
         string data="";
+        command=inputdata[j];
+        outputfile << directory << "\\> ";
+        outputfile<<command<<endl;
+        //getline (cin, command);
 
-        cout << directory << "\\> ";
-        getline (cin, command);
 
         for(int i=0; i<command.length(); i++)
         {
@@ -226,7 +245,8 @@ void *executeCommand(void *parameter)
 
                 if(exists)
                 {
-                    printMessage("Directory already exists");
+                    //printMessage("Directory already exists");
+                    outputfile<<"Directory already exists"<<endl;
                 }
                 else
                 {
@@ -242,20 +262,20 @@ void *executeCommand(void *parameter)
         {
             if(current->children.size()!=0)
             {
-                cout<<"No.\tName\tisFile\tSize\t\tCreated At\t\t\tModified At"<<endl;
+                outputfile<<"No.\tName\tisFile\tSize\t\tCreated At\t\t\tModified At"<<endl;
                 for(int i=0;i<current->children.size();i++)
                 {
                     if(current->children[i]->isFile==1)
                     {
-                        cout<<i+1<<"\t"<<current->children[i]->name<<"\t  "<<"True\t"<< current->children[i]->data.length() <<"\t"<<current->children[i]->createdAt<<"\t"<<current->children[i]->modifiedAt<<endl;
+                        outputfile<<i+1<<"\t"<<current->children[i]->name<<"\t  "<<"True\t"<< current->children[i]->data.length() <<"\t"<<current->children[i]->createdAt<<"\t"<<current->children[i]->modifiedAt<<endl;
                     }
                     else
                     {
-                        cout<<i+1<<"\t"<<current->children[i]->name<<"\t  "<<"False\t"<<"---\t"<<current->children[i]->createdAt<<"\t"<<current->children[i]->modifiedAt<<endl;
+                        outputfile<<i+1<<"\t"<<current->children[i]->name<<"\t  "<<"False\t"<<"---\t"<<current->children[i]->createdAt<<"\t"<<current->children[i]->modifiedAt<<endl;
                     }
 
                 }
-                cout<<endl;
+                outputfile<<endl;
             }
         }
         else if(command == "cd")
@@ -299,7 +319,8 @@ void *executeCommand(void *parameter)
 
             if(!sourceexists)
             {
-                printMessage("File does not exist");
+                //printMessage("File does not exist");
+                outputfile<<"File does not exist"<<endl;
             }
             else
             {
@@ -327,7 +348,8 @@ void *executeCommand(void *parameter)
 
                 if(exists)
                 {
-                    printMessage("File already exists");
+                    //printMessage("File already exists");
+                    outputfile<<"File already exists"<<endl;
                 }
                 else
                 {
@@ -356,7 +378,8 @@ void *executeCommand(void *parameter)
 
                 if(!exists)
                 {
-                    printMessage("File doesnot exists");
+                    //printMessage("File doesnot exists");
+                    outputfile<<"File already exists"<<endl;
                 }
                 else
                 {
@@ -383,7 +406,8 @@ void *executeCommand(void *parameter)
             {
                 if(!exists)
                 {
-                    printMessage("File doesnot exists");
+                    //printMessage("File doesnot exists");
+                    outputfile<<"File doesnot exists"<<endl;
                 }
                 else
                 {
@@ -393,12 +417,14 @@ void *executeCommand(void *parameter)
                         {
                             current->children[i]->isOpen=true;
                             current->children[i]->mode=mode;
-                            printMessage("File opened.");
+                            //printMessage("File opened.");
+                            outputfile<<"File opened."<<endl;
                             break;
                         }
                         else if(current->children[i]->isOpen==true)
                         {
-                            printMessage("File is already open.");
+                            //printMessage("File is already open.");
+                            outputfile<<"File is already open."<<endl;
                         }
                     }
                 }
@@ -420,7 +446,8 @@ void *executeCommand(void *parameter)
             {
                 if(!exists)
                 {
-                    printMessage("File doesnot exists");
+                    //printMessage("File doesnot exists");
+                    outputfile<<"File doesnot exists"<<endl;
                 }
                 else
                 {
@@ -430,12 +457,14 @@ void *executeCommand(void *parameter)
                         {
                             current->children[i]->isOpen=false;
                             current->children[i]->mode="";
-                            printMessage("File closed.");
+                            //printMessage("File closed.");
+                            outputfile<<"File closed."<<endl;
                             break;
                         }
                         else if(current->children[i]->isOpen==false)
                         {
-                            printMessage("File is already closed.");
+                            //printMessage("File is already closed.");
+                            outputfile<<"File is already closed."<<endl;
                         }
                     }
                 }
@@ -458,7 +487,8 @@ void *executeCommand(void *parameter)
             {
                 if(!exists)
                 {
-                    printMessage("File doesnot exists");
+                    //printMessage("File doesnot exists");
+                    outputfile<<"File doesnot exists"<<endl;
                 }
                 else
                 {
@@ -489,7 +519,8 @@ void *executeCommand(void *parameter)
                         }
                         else
                         {
-                            printMessage("File is not opened.");
+                            //printMessage("File is not opened.");
+                            outputfile<<"File is not opened."<<endl;
                         }
                     }
                 }
@@ -512,13 +543,14 @@ void *executeCommand(void *parameter)
             {
                 if(!exists)
                 {
-                    printMessage("File doesnot exists");
+                    //printMessage("File doesnot exists");
+                    outputfile<<"File doesnot exists"<<endl;
                 }
                 else if(current->children[i]->data.size()!=0 && current->children[i]->isOpen==true)
                 {
                     if(mode=="s")
                     {
-                        cout<<current->children[i]->data<<endl;
+                        outputfile<<current->children[i]->data<<endl;
                     }
                     else if(mode=="f")
                     {
@@ -526,19 +558,21 @@ void *executeCommand(void *parameter)
                         {
                             for(int j=stoi(start);j<current->children[i]->data.size();j++)
                             {
-                                cout<<current->children[i]->data[j];
+                                outputfile<<current->children[i]->data[j];
                             }
-                            cout<<endl;
+                            outputfile<<endl;
                         }
                     }
                     else
                     {
-                        printMessage("Invalid mode");
+                        //printMessage("Invalid mode");
+                        outputfile<<"Invalid mode"<<endl;
                     }
                 }
                 else if(current->children[i]->isOpen==false)
                 {
-                    printMessage("File is not opened.");
+                    //printMessage("File is not opened.");
+                    outputfile<<"File is not opened."<<endl;
                 }
             }
         }
@@ -559,7 +593,8 @@ void *executeCommand(void *parameter)
 
                 if(!exists)
                 {
-                    printMessage("File doesnot exists");
+                    //printMessage("File doesnot exists");
+                    outputfile<<"File doesnot exists"<<endl;
                 }
                 else
                 {
@@ -591,7 +626,8 @@ void *executeCommand(void *parameter)
 
                  if(!exists)
                 {
-                    printMessage("File doesnot exists");
+                    //printMessage("File doesnot exists");
+                    outputfile<<"File doesnot exists"<<endl;
                 }
                 else
                 {
@@ -608,13 +644,13 @@ void *executeCommand(void *parameter)
         {
             int temp=0;
             int used=1024-size;
-            cout<<"Total: 1024 KB's"<<endl;
-            cout<<"Used: "<<used<<" KB's"<<endl;
-            cout<<"Free: "<<size<<" KB's"<<endl;
-            printf("\n\n");
-            printTree(root,0);
+            outputfile<<"Total: 1024 KB's"<<endl;
+            outputfile<<"Used: "<<used<<" KB's"<<endl;
+            outputfile<<"Free: "<<size<<" KB's"<<endl;
+            outputfile<<"\n\n";
+            //printTree(root,0);
 
-            printf("\n\n");
+            /*printf("\n\n");
             temp=used;
             for(int i=0;i<8;i++)
             {
@@ -631,40 +667,43 @@ void *executeCommand(void *parameter)
                 printf("\n");
             }
 
-            printf("\n\n");
+            printf("\n\n");*/
         }
         else if(command=="clear")
         {
             system("cls");
-            cout<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
+            outputfile<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
         }
         else if(command == "help")
         {
-            getHelp();
+            //getHelp();
+            outputfile << "ls [directory] - Display a list of files and subdirectories in a directory." << endl;
+            outputfile<<"create [filename] - Create a file with the name [filename]." << endl;
+            outputfile << "delete [filename] - Delete the file specified in [filename]." << endl;
+            outputfile <<"mkdir [directory] - Create the directory specified in [directory]." << endl;
+            outputfile << "cd [directory] - Change the current directory to [directory]." << endl;
+            outputfile<<"move [source] [destinaiton] - Moves source to specified [directory]." << endl;
+            outputfile << "open [filename] [m]- Open the file specified in [filename]." << endl;
+            outputfile << "close [filename] - Close the file specified in [filename]." << endl;
+            outputfile << "write [filename] [m] [p] [data]- Writes to the file specified in [filename]." << endl;
+            outputfile << "read [filename] [m] [p] - Reads the file specified in [filename]." << endl;
+            outputfile<< "truncate [filename] [p]- Truncates the file specified in [filename]." << endl;
+            outputfile << "memory - Displays the memory tree." << endl;
+            outputfile <<"clear - Clears the screen." << endl;
+            outputfile << "help - Display the user manual." << endl;
+            outputfile << "exit - Exit the shell.\n" << endl;
         }
         else if(command == "exit")
         {
-            while(1)
-            {
-                cout<<"Do you want to save changes? (y/n): ";
-                char ch;
-                cin>>ch;
-
-                if(ch=='y')
-                {
-                    saveFile(root);
-                    exit(0);
-                }
-                else
-                {
-                    exit(0);
-                }
-            }
+            //exit(0);
+            break;
         }
         else
         {
-            invalidCommand(command);
+            //invalidCommand(command);
+            outputfile << "'"<<command <<"' "<<"is not recognized as an internal or external command, operable program or batch file.\n" << endl;
         }
+        j++;
     }
 }
 
@@ -676,7 +715,7 @@ int main(int argc, char *argv[])
         return 0;
     }*/
 
-    int threadnum=1;//stoi(argv[1]);
+    int threadnum=5;//stoi(argv[1]);
 
     cout<<"Number of Threads: "<<threadnum<<endl;
     cout<<"\nDefault Input File   |   Default Output File"<<endl;
@@ -696,5 +735,7 @@ int main(int argc, char *argv[])
     {
         pthread_join(thread[i], NULL);
     }
+
+    cout<<"\n\nExiting..."<<endl;
 
 }
