@@ -5,7 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include<cstring>
-#include <ctime>   
+#include <ctime>
 #include<stdlib.h>
 #include<string.h>
 #include <algorithm>
@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include<vector>
 #include <ctime>
+#include<pthread.h>
 
 using namespace std;
 
@@ -30,7 +31,7 @@ class Node
         vector<Node*> children;
         string createdAt;
         string modifiedAt;
-        
+
         Node(string name, bool isFile, Node* parent)
         {
             time_t ttime = time(0);
@@ -42,7 +43,7 @@ class Node
 
             if(!isFile)
             {
-                this->data = "";    
+                this->data = "";
             }
         }
 };
@@ -81,9 +82,9 @@ void printMessage(string message)
 string reverseString(string directory)
 {
     string rev = "";
-    
+
     for(int i=directory.length()-1; i>=0; i--){
-        rev = rev + directory[i];  
+        rev = rev + directory[i];
     }
 
     return rev;
@@ -98,7 +99,7 @@ vector<string> tokenize(string str, char delim){
             temp = "";
         }
         else
-            temp += str[i];           
+            temp += str[i];
     }
     tokens.push_back(temp);
     return tokens;
@@ -147,24 +148,25 @@ void saveFile(Node *root)
 
 void loadFile(Node *root)
 {
-    
+
 }
 
-int main()
+
+void *executeCommand(void *parameter)
 {
+    int thread=*((int*)(&parameter))+1;
     int size = 1024;//1MB
     string path;
     struct Node *root = new Node("root", false, NULL);
 
     struct Node *current=root;
     string directory=current->name;
-    
-    cout<<"OS File Management System [Version 10.0.0]. All rights reserved.\n\n"<<endl;
+    cout<<"\n\nOS File Management System [Version 10.0."<<thread<<"]. All rights reserved.\n\n"<<endl;
 
     while(1)
     {
         int number=0;
-        string start="";      
+        string start="";
         string mode="";
         string command="";
         string data="";
@@ -179,7 +181,7 @@ int main()
 
         vector<string> tokens = tokenize(command, ' ');
         string arguments[5];
-        
+
         int i=0;
         for(string s: tokens)
         {
@@ -207,7 +209,7 @@ int main()
                 number++;
             }
         }
-        
+
         if(command == "mkdir")
         {
             if(number>=2)
@@ -251,7 +253,7 @@ int main()
                     {
                         cout<<i+1<<"\t"<<current->children[i]->name<<"\t  "<<"False\t"<<"---\t"<<current->children[i]->createdAt<<"\t"<<current->children[i]->modifiedAt<<endl;
                     }
-                    
+
                 }
                 cout<<endl;
             }
@@ -262,7 +264,7 @@ int main()
             {
                 if(path==".." && current->parent!=NULL)
                 {
-                    current=current->parent;  
+                    current=current->parent;
                     string temp=reverseString(directory);
                     temp=temp.substr(temp.find("\\")+1,temp.length()-1);
                     directory=reverseString(temp);
@@ -288,7 +290,7 @@ int main()
             for(i=0;i<current->children.size();i++)
             {
                 if(current->children[i]->name==path)
-                {  
+                {
                     sourceexists=true;
                     break;
                 }
@@ -317,7 +319,7 @@ int main()
                 for(int i=0;i<current->children.size();i++)
                 {
                     if(current->children[i]->name==path && current->children[i]->isFile)
-                    {  
+                    {
                         exists=true;
                         break;
                     }
@@ -346,7 +348,7 @@ int main()
                 for(i=0;i<current->children.size();i++)
                 {
                     if(current->children[i]->name==path && current->children[i]->isFile)
-                    {  
+                    {
                         exists=true;
                         break;
                     }
@@ -371,7 +373,7 @@ int main()
             for(int i=0;i<current->children.size();i++)
             {
                 if(current->children[i]->name==path && current->children[i]->isFile)
-                {  
+                {
                     exists=true;
                     break;
                 }
@@ -388,7 +390,7 @@ int main()
                     for(int i=0;i<current->children.size();i++)
                     {
                         if(current->children[i]->name==path && current->children[i]->isFile && current->children[i]->isOpen==false)
-                        {  
+                        {
                             current->children[i]->isOpen=true;
                             current->children[i]->mode=mode;
                             printMessage("File opened.");
@@ -408,7 +410,7 @@ int main()
             for(int i=0;i<current->children.size();i++)
             {
                 if(current->children[i]->name==path && current->children[i]->isFile)
-                {  
+                {
                     exists=true;
                     break;
                 }
@@ -425,7 +427,7 @@ int main()
                     for(int i=0;i<current->children.size();i++)
                     {
                         if(current->children[i]->name==path && current->children[i]->isFile && current->children[i]->isOpen==true)
-                        {  
+                        {
                             current->children[i]->isOpen=false;
                             current->children[i]->mode="";
                             printMessage("File closed.");
@@ -445,7 +447,7 @@ int main()
             for(int i=0;i<current->children.size();i++)
             {
                 if(current->children[i]->name==path && current->children[i]->isFile)
-                {  
+                {
                     exists=true;
                     break;
                 }
@@ -459,12 +461,12 @@ int main()
                     printMessage("File doesnot exists");
                 }
                 else
-                {                    
+                {
                     size-=sizeof(current->children[i]);
                     for(int i=0;i<current->children.size();i++)
                     {
                         if(current->children[i]->name==path && current->children[i]->isFile && current->children[i]->isOpen==true)
-                        {  
+                        {
                             if(mode=="a")
                             {
                                 current->children[i]->data+=data;
@@ -478,7 +480,7 @@ int main()
                                 printMessage("Invalid mode");
                                 break;
                             }
-                            
+
                             size+=sizeof(current->children[i]);
                             time_t ttime = time(0);
                             current->children[i]->modifiedAt = strtok(ctime(&ttime),"\n");
@@ -500,7 +502,7 @@ int main()
             for(i=0;i<current->children.size();i++)
             {
                 if(current->children[i]->name==path && current->children[i]->isFile)
-                {  
+                {
                     exists=true;
                     break;
                 }
@@ -549,7 +551,7 @@ int main()
                 for(i=0;i<current->children.size();i++)
                 {
                     if(current->children[i]->name==path && current->children[i]->isFile)
-                    {  
+                    {
                         exists=true;
                         break;
                     }
@@ -581,7 +583,7 @@ int main()
                 for(i=0;i<current->children.size();i++)
                 {
                     if(current->children[i]->name==path && current->children[i]->isFile)
-                    {  
+                    {
                         exists=true;
                         break;
                     }
@@ -627,7 +629,7 @@ int main()
                 }
                 temp=0;
                 printf("\n");
-            }       
+            }
 
             printf("\n\n");
         }
@@ -664,4 +666,35 @@ int main()
             invalidCommand(command);
         }
     }
+}
+
+int main(int argc, char *argv[])
+{
+    /*if(argc!=2)
+    {
+        cout<<"Invalid number of arguments"<<endl;
+        return 0;
+    }*/
+
+    int threadnum=1;//stoi(argv[1]);
+
+    cout<<"Number of Threads: "<<threadnum<<endl;
+    cout<<"\nDefault Input File   |   Default Output File"<<endl;
+    for(int i=0;i<threadnum;i++)
+    {
+        cout<<"input_thread"<<i+1<<".txt    |   output_thread"<<i+1<<".txt"<<endl;
+    }
+
+    pthread_t thread[threadnum];
+
+    for(int i=0;i<threadnum;i++)
+    {
+        pthread_create(&thread[i], NULL, &executeCommand, (void *)i);
+    }
+
+    for(int i=0;i<threadnum;i++)
+    {
+        pthread_join(thread[i], NULL);
+    }
+
 }
