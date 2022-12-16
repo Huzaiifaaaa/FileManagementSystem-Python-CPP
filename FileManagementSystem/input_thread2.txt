@@ -1,8 +1,5 @@
-mkdir app
-ls
-mkdir app
-ls
-mkdir windows
-cd huzaifa
-ls
-exit
+create file.txt
+create file2.txt
+create file3.txt
+delete file2.txt
+memory

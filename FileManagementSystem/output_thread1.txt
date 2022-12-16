@@ -4,30 +4,30 @@ OS File Management System [Version 10.0.1]. All rights reserved.
 
 
 root\> create file.txt
-root\> write file.txt w 0 hello world
-File is not opened.
-File is not opened.
-File is not opened.
-root\> open file.txt
-File opened.
-root\> ls
-No.	Name	isFile	Size		Created At			Modified At
-1	app	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
-2	windows	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
-3	file.txt	  True	0	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
+root\> create file2.txt
+root\> create file3.txt
+root\> delete file2.txt
+root\> memory
+Total: 512 KB's
+Used: 16 KB's
+Free: 496 KB's
 
-root\> write file.txt w 0 hello world
-File is not opened.
-File is not opened.
-root\> read file.txt s
-0 hello world 
-root\> close file.txt
-File is already closed.
-File is already closed.
-File closed.
-root\> delete file.txt
-root\> ls
-No.	Name	isFile	Size		Created At			Modified At
-1	app	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
-2	windows	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
 
+
+	1 1 1 1 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	

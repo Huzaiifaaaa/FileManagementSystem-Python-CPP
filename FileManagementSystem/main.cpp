@@ -31,8 +31,10 @@ class Node
         vector<Node*> children;
         string createdAt;
         string modifiedAt;
+        int startPos;
+        int endPos;
 
-        Node(string name, bool isFile, Node* parent)
+        Node(string name, bool isFile, Node* parent,int s,int e)
         {
             time_t ttime = time(0);
             this->name = name;
@@ -40,6 +42,8 @@ class Node
             this->isOpen=false;
             this->parent = parent;
             this->createdAt = this->modifiedAt = strtok(ctime(&ttime),"\n");
+            startPos=s;
+            endPos=e;
 
             if(!isFile)
             {
@@ -137,24 +141,16 @@ void printTree(Node *root, int level)
     }
 }
 
-void saveFile(Node *root)
-{
-    ofstream file("memory.dat");
-    file.write((char*)root,sizeof(Node));
-    file.close();
-}
 
-void loadFile(Node *root)
-{
-
-}
-
-int size = 1024;//1MB
+int size = 512;//512KB
 string path;
-struct Node *root = new Node("root", false, NULL);
+struct Node *root = new Node("root", false, NULL,0,0);
 
 struct Node *current=root;
 string directory=current->name;
+
+int memory[512]={0};
+int memcounter=0;
 
 void *executeCommand(void *parameter)
 {
@@ -250,7 +246,7 @@ void *executeCommand(void *parameter)
                 }
                 else
                 {
-                    struct Node *mkdir = new Node(path, false, current);
+                    struct Node *mkdir = new Node(path, false, current,0,0);
                     // size-=sizeof(mkdir);
                     current->children.push_back(mkdir);
                     time_t ttime = time(0);
@@ -346,6 +342,13 @@ void *executeCommand(void *parameter)
                     }
                 }
 
+
+                if(size==0)
+                {
+                    outputfile<<"Not enough memory!"<<endl;
+                    break;
+                }
+
                 if(exists)
                 {
                     //printMessage("File already exists");
@@ -353,11 +356,18 @@ void *executeCommand(void *parameter)
                 }
                 else
                 {
-                    struct Node *file = new Node(path, true, current);
+                    struct Node *file = new Node(path, true, current,memcounter,memcounter+4);
+
+                    for(int k=memcounter;k<memcounter+4;k++)
+                    {
+                        memory[k]=1;
+                    }
+
                     current->children.push_back(file);
                     size-=sizeof(file);
                     time_t ttime = time(0);
                     current->modifiedAt = strtok(ctime(&ttime),"\n");
+                    memcounter+=4;
                 }
             }
         }
@@ -379,11 +389,17 @@ void *executeCommand(void *parameter)
                 if(!exists)
                 {
                     //printMessage("File doesnot exists");
-                    outputfile<<"File already exists"<<endl;
+                    outputfile<<"File doesnot exists"<<endl;
                 }
                 else
                 {
                     size+=sizeof(current->children[i]);
+
+                    for(int k=current->children[i]->startPos;k<current->children[i]->endPos;k++)
+                    {
+                        memory[k]=0;
+                    }
+
                     current->children.erase(current->children.begin()+i);
                     time_t ttime = time(0);
                     current->modifiedAt = strtok(ctime(&ttime),"\n");
@@ -643,31 +659,25 @@ void *executeCommand(void *parameter)
         else if(command=="memory")
         {
             int temp=0;
-            int used=1024-size;
-            outputfile<<"Total: 1024 KB's"<<endl;
+            int used=512-size;
+            outputfile<<"Total: 512 KB's"<<endl;
             outputfile<<"Used: "<<used<<" KB's"<<endl;
             outputfile<<"Free: "<<size<<" KB's"<<endl;
             outputfile<<"\n\n";
             //printTree(root,0);
 
-            /*printf("\n\n");
-            temp=used;
-            for(int i=0;i<8;i++)
+            outputfile<<"\n\t";
+            for(int i=1;i<=512;i++)
             {
-                printf("\t");
-                for(int j=0;j<temp;j++)
+                outputfile<<memory[i-1]<<" ";
+
+                if(i%32==0)
                 {
-                   printf("/");
+                    outputfile<<endl;
+                    outputfile<<"\t";
                 }
-                for(int j=0;j<128-temp;j++)
-                {
-                   printf("-");
-                }
-                temp=0;
-                printf("\n");
             }
 
-            printf("\n\n");*/
         }
         else if(command=="clear")
         {
@@ -715,7 +725,7 @@ int main(int argc, char *argv[])
         return 0;
     }*/
 
-    int threadnum=5;//stoi(argv[1]);
+    int threadnum=2;//stoi(argv[1]);
 
     cout<<"Number of Threads: "<<threadnum<<endl;
     cout<<"\nDefault Input File   |   Default Output File"<<endl;

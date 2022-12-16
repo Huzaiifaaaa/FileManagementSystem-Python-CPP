@@ -1,9 +1,5 @@
 create file.txt
-write file.txt w 0 hello world
-open file.txt
-ls
-write file.txt w 0 hello world
-read file.txt s
-close file.txt
-delete file.txt
-ls
+create file2.txt
+create file3.txt
+delete file2.txt
+memory

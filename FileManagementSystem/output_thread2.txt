@@ -3,22 +3,33 @@
 OS File Management System [Version 10.0.2]. All rights reserved.
 
 
-root\> mkdir app
-root\> ls
-No.	Name	isFile	Size		Created At			Modified At
-1	app	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
+root\> create file.txt
+File already exists
+root\> create file2.txt
+root\> create file3.txt
+File already exists
+root\> delete file2.txt
+root\> memory
+Total: 512 KB's
+Used: 16 KB's
+Free: 496 KB's
 
-root\> mkdir app
-Directory already exists
-root\> ls
-No.	Name	isFile	Size		Created At			Modified At
-1	app	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
 
-root\> mkdir windows
-root\> cd huzaifa
-root\> ls
-No.	Name	isFile	Size		Created At			Modified At
-1	app	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
-2	windows	  False	---	Tue Dec 13 21:56:51 2022	Tue Dec 13 21:56:51 2022
 
-root\> exit
+	1 1 1 1 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+	
