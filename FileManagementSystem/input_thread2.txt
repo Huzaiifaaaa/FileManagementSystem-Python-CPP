@@ -1,5 +1,0 @@
-create file.txt
-create file2.txt
-create file3.txt
-delete file2.txt
-memory
