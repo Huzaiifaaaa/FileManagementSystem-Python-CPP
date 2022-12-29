@@ -27,12 +27,15 @@ class Node:
 
 
 def printTree(node, level):
+    message=""
     if node.isFile:
-        print("\t" * level, node.name)
+        message+=("\t" * level)+node.name
     else:
-        print("\t" * level, node.name)
+        message+=("\t" * level)+node.name
         for child in node.children:
-            printTree(child, level + 1) 
+            message+=printTree(child, level + 1) 
+    
+    return message
 
 def searchTree(node, name):
     if node.name == name:
@@ -136,8 +139,7 @@ def main():
                     for i in range(len(current.children)):
                         if current.children[i].name==path:
                             directory+="\\"+current.children[i].name
-                            #current=current.children[i]
-                            #print(current.children)
+                            current=current.children[i]
                             break
 
         elif command=="move":
@@ -305,7 +307,8 @@ def main():
                     print("File does not exist.")
 
         elif command=="memory":
-            printTree(root, 0)
+            message=printTree(root, 0)
+            print(message)
         elif command=="help":
             getHelp()
         elif command=="clear":

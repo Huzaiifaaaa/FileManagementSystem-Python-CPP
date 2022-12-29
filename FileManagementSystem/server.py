@@ -28,12 +28,15 @@ class Node:
         self.endPos = end
 
 def printTree(node, level):
+    message=""
     if node.isFile:
-        print("\t" * level, node.name)
+        message+=("\t" * level)+node.name
     else:
-        print("\t" * level, node.name)
+        message+=("\t" * level)+node.name
         for child in node.children:
-            printTree(child, level + 1) 
+            message+=printTree(child, level + 1) 
+    
+    return message
 
 def searchTree(node, name):
     if node.name == name:
@@ -46,21 +49,22 @@ def searchTree(node, name):
     return None
 
 def getHelp():
-    print("ls [directory] - Display a list of files and subdirectories in a directory.")
-    print("create [filename] - Create a file with the name [filename].")
-    print("delete [filename] - Delete the file specified in [filename].")
-    print("mkdir [directory] - Create the directory specified in [directory].")
-    print("cd [directory] - Change the current directory to [directory].")
-    print("move [source] [destinaiton] - Moves source to specified [directory].")
-    print("open [filename] [m]- Open the file specified in [filename].")
-    print("close [filename] - Close the file specified in [filename].")
-    print("write [filename] [m] [p] [data]- Writes to the file specified in [filename].")
-    print("read [filename] [m] [p] - Reads the file specified in [filename].")
-    print("truncate [filename] [p]- Truncates the file specified in [filename].")
-    print("memory - Displays the memory tree.")
-    print("clear - Clears the screen.")
-    print("help - Display the user manual.")
-    print("exit - Exit the shell.\n")
+    message="ls [directory] - Display a list of files and subdirectories in a directory.\n"
+    message+="create [filename] - Create a file with the name [filename].\n"
+    message+="delete [filename] - Delete the file specified in [filename].\n"
+    message+="mkdir [directory] - Create the directory specified in [directory].\n"
+    message+="cd [directory] - Change the current directory to [directory].\n"
+    message+="move [source] [destinaiton] - Moves source to specified [directory].\n"
+    message+="open [filename] [m]- Open the file specified in [filename].\n"
+    message+="close [filename] - Close the file specified in [filename].\n"
+    message+="write [filename] [m] [p] [data]- Writes to the file specified in [filename].\n"
+    message+="read [filename] [m] [p] - Reads the file specified in [filename].\n"
+    message+="truncate [filename] [p]- Truncates the file specified in [filename].\n"
+    message+="memory - Displays the memory tree.\n"
+    message+="clear - Clears the screen.\n"
+    message+="help - Display the user manual.\n"
+    message+="exit - Exit the shell.\n"
+    return message
 
 
 def tokenize(command):
@@ -84,78 +88,26 @@ def server():
     server_socket.bind((host, port)) 
     server_socket.listen(2)
     conn, address = server_socket.accept()
-    print("Connection from client: " + str(address))
+
+    name=conn.recv(2048).decode()
+    print("Connection from: " + str(address) + " " + name)
 
     starter="\nOS File Management System [Version 10.1.1]. All rights reserved.\n"
     conn.send(starter.encode())
-    #print(starter)
+    print(starter)
 
     while True:
         temp=directory+"\\> "
         conn.send(temp.encode())
-        #print(temp, end="")
+        print(temp, end="")
 
-        command = conn.recv(1024).decode()
+        command = conn.recv(2048).decode()
+        print(command, end="")
 
         number=0
         start=""
         mode=""
         data=""
-
-        tokens=["", "", "", "", ""]
-        tokens=tokenize(command)
-
-        for i in range(0,len(tokens)):
-            if tokens[i]!="":
-                number+=1
-
-        for i in range(0,number):
-            if i==0 and tokens[i]!="":
-                command=tokens[i]
-            elif i==1 and tokens[i]!="":
-                path=tokens[i]
-            elif i==2 and tokens[i]!="":
-                mode=tokens[i]
-            elif i==3 and tokens[i]!="":
-                start=tokens[i]
-            elif i==4 and tokens[i]!="":
-                data=tokens[i]
-
-            if command=="mkdir":
-                if(number>=2):
-                    exists=False
-                    for i in range(len(current.children)):
-                        if current.children[i].name==path and current.children[i].isFile==False:
-                            exists=True
-                            break
-
-                    if exists:
-                        message="Directory already exists."
-                        conn.send(message.encode())
-                    else:
-                        node=Node(path, False, current,0, 0)
-                        current.children.append(node)
-                        current.modifiedAt=str(datetime.now())
-                        message="Directory created."
-                        conn.send(message.encode())
-        #data = input(' -> ')
-        #conn.send(data.encode()) 
-    conn.close() 
-
-
-
-
-def run(command):
-
-    while True:
-        number=0
-        start=""
-        mode=""
-        #command=""
-        data=""
-
-        print(directory + "\\> "+command)
-        #command=input(directory + "\\> ")
 
         tokens=["", "", "", "", ""]
         tokens=tokenize(command)
@@ -184,32 +136,38 @@ def run(command):
                         exists=True
                         break
 
+                message=""
                 if exists:
-                    print("Directory already exists.")
-                else:
+                    message="Directory already exists."
+                elif exists==False:
                     node=Node(path, False, current,0, 0)
                     current.children.append(node)
                     current.modifiedAt=str(datetime.now())
+                    message="Directory created."
+            
+            conn.send(message.encode())
+            print("\n"+message)
 
         elif command=="ls":
             if(len(current.children)!=0):
-                print("No.\tName\tisFile\tSize\t\tCreated At\t\t\tModified At");
+                message="\nNo.\tName\tisFile\tSize\t\tCreated At\t\t\tModified At\n"
                 for i in range(len(current.children)):
-                    print(str(i+1)+"\t"+current.children[i].name+"\t"+str(current.children[i].isFile)+"\t"+str(sys.getsizeof(current.children[i])) +"\t"+current.children[i].createdAt+"\t"+current.children[i].modifiedAt)
-                print("\n")        
+                    message+=str(i+1)+"\t"+current.children[i].name+"\t"+str(current.children[i].isFile)+"\t"+str(sys.getsizeof(current.children[i])) +"\t"+current.children[i].createdAt+"\t"+current.children[i].modifiedAt+"\n"
+                 
+                conn.send(message.encode()) 
+                print("\n"+message) 
 
-        elif command=="cd":
-            if(number>=2):
-                if(path==".." and current.parent!=None):
-                    current=current.parent
-                    directory=directory[:directory.rfind("\\")]
-                else:
-                    for i in range(len(current.children)):
-                        if current.children[i].name==path:
-                            directory+="\\"+current.children[i].name
-                            #current=current.children[i]
-                            #print(current.children)
-                            break
+        # elif command=="cd":
+        #     if(number>=2):
+        #         if(path==".." and current.parent!=None):
+        #             current=current.parent
+        #             directory=directory[:directory.rfind("\\")]
+        #         else:
+        #             for i in range(len(current.children)):
+        #                 if current.children[i].name==path:
+        #                     directory+="\\"+current.children[i].name
+        #                     current=current.children[i]
+        #                     break
 
         elif command=="move":
             if (number>=3):
@@ -221,6 +179,7 @@ def run(command):
                         index=i
                         break
 
+                message=""
                 if exists:
                     source=current.children[index]
                     destination=searchTree(root, mode)
@@ -230,9 +189,14 @@ def run(command):
                         source.parent=destination
                         current.children.pop(index)
                         current.modifiedAt=str(datetime.now())
-
+                        message="File moved."
+                    else:
+                        message="Unable to move file."
                 else:
-                    print("File does not exist.")
+                    message="File does not exist."
+
+                conn.send(message.encode())
+                print("\n"+message)
 
         elif command=="create":
             if(number>=2):
@@ -243,15 +207,19 @@ def run(command):
                         break
 
                 if(size==0):
-                    print("Not enough memory!\n")
+                    message="Not enough memory!"
                     break
 
                 if exists:
-                    print("File already exists.")
+                    message="File already exists."
                 else:
                     node=Node(path, True, current, 0, 0)
                     current.children.append(node)
                     current.modifiedAt=str(datetime.now())
+                    message="File created."
+
+                conn.send(message.encode())
+                print("\n"+message)
 
         elif command=="delete":
             if(number>=2):
@@ -263,11 +231,16 @@ def run(command):
                         index=i
                         break
 
+                message=""
                 if exists:
                     current.children.remove(current.children[index])
                     current.modifiedAt=str(datetime.now())
+                    message="File deleted."
                 else:
-                    print("File does not exist.")
+                    message="File does not exist."
+
+                conn.send(message.encode())
+                print("\n"+message)
 
         elif command=="open":
             if(number>=2):
@@ -279,12 +252,17 @@ def run(command):
                         index=i
                         break
 
+                message=""
                 if exists:
                     current.children[index].isOpen=True
                     current.children[index].mode=mode
                     current.modifiedAt=str(datetime.now())
+                    message="File opened."
                 else:
-                    print("File does not exist.")
+                    message="File does not exist."
+
+                conn.send(message.encode())
+                print("\n"+message)
 
         elif command=="close":
             if (number>=2):
@@ -296,11 +274,16 @@ def run(command):
                         index=i
                         break
 
+                message=""
                 if exists:
                     current.children[index].isOpen=False
                     current.modifiedAt=str(datetime.now())
+                    message="File closed."
                 else:
-                    print("File does not exist.")
+                    message="File does not exist."
+
+                conn.send(message.encode())
+                print("\n"+message)
 
         elif command=="write":
             if(number>=4):
@@ -312,9 +295,10 @@ def run(command):
                         index=i
                         break
 
+                message=""
                 if exists:
                     if current.children[index].isOpen==False:
-                        print("File is not open.")
+                        message="File is not open."
                     else:
                         data=""
                         for j in range(3,number):
@@ -328,9 +312,13 @@ def run(command):
                             current.children[index].data+=data
                             current.children[index].size=len(data)
                             current.modifiedAt=str(datetime.now())
+                        message="File written."
                 else:
-                    print("File does not exist.")
+                    message="File does not exist."
 
+                conn.send(message.encode())
+                print("\n"+message) 
+    
         elif command=="read":
             if(number>=3):
                 exists=False
@@ -343,18 +331,21 @@ def run(command):
 
                 if exists:
                     if current.children[index].isOpen==False:
-                        print("File is not open.")
+                        message="File is not open."
                     else:
                         if len(current.children[index].data)!=0:
                             if mode=="s":
-                                print(current.children[index].data)
+                                message=current.children[index].data
                             else:
                                 if(number>=4):
                                     for j in range(int(start),len(current.children[index].data)):
                                         data+=current.children[index].data[j]
-                                    print(data)
+                                    message=data
                 else:
-                    print("File does not exist.")
+                    message="File does not exist."
+
+                conn.send(message.encode())
+                print("\n"+message) 
 
         elif command=="truncate":
             if(number>=3):
@@ -368,24 +359,36 @@ def run(command):
 
                 if exists:
                     if current.children[index].isOpen==False:
-                        print("File is not open.")
+                        message="File is not open."
                     else:
                         current.children[index].data=current.children[index].data[:int(mode)]
                         current.modifiedAt=str(datetime.now())
+                        message="File truncated."
                 else:
-                    print("File does not exist.")
+                    message="File does not exist."
+
+                conn.send(message.encode())
+                print("\n"+message) 
 
         elif command=="memory":
-            printTree(root, 0)
+            #message=printTree(root, 0)
+            message="Memory"
+            conn.send(message.encode())
+            print("\n"+message)
+            
         elif command=="help":
-            getHelp()
+            message=getHelp()
+            conn.send(message.encode())
+            print("\n"+message)
+
         elif command=="clear":
             os.system('cls')
-            print("\nOS File Management System [Version 10.1.1]. All rights reserved.\n\n")
-        elif command=="exit":
-            exit()
-        else:
-            print("'"+command+"' is not recognized as an internal or external command, operable program or batch file.\n")
+            message="OS File Management System [Version 10.1.1]. All rights reserved.\n\n"
+            conn.send(message.encode())
+            print("\n"+message)
+
+    conn.close() 
+
 
 if __name__ == '__main__':
     server()

@@ -1,4 +1,5 @@
 import socket
+import os
 
 def client():
     host = socket.gethostname()
@@ -6,19 +7,30 @@ def client():
     client_socket = socket.socket()
     client_socket.connect((host, port))
 
-    starter=client_socket.recv(1024).decode()
+    name=input("Enter your name: ")
+    client_socket.send(name.encode())
+
+    starter=client_socket.recv(2048).decode()
     print(starter)
 
     while True:
-        path=client_socket.recv(1024).decode()
+        path=client_socket.recv(2048).decode()
 
         sendermessage = input(path) 
-        client_socket.send(sendermessage.encode()) 
 
-        received = client_socket.recv(1024).decode()
-        #print(data)
+        if sendermessage == 'exit':
+            break
+        elif sendermessage == 'clear':
+            client_socket.send(sendermessage.encode()) 
+            os.system('cls')
+            continue
+        else:    
+            client_socket.send(sendermessage.encode()) 
 
-    client_socket.close()
+        received = client_socket.recv(2048).decode()
+        print(received)
+
+    #client_socket.close()
 
 if __name__ == '__main__':
     client()
