@@ -151,7 +151,7 @@ def main():
                 if (path == ".." and current.parent != None):
                     current = current.parent
                     directory = directory[:directory.rfind("\\")]
-                    print(directory)
+                    # print(directory)
                 else:
                     for i in range(len(current.children)):
                         if current.children[i].name == path:
